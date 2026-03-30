@@ -1,6 +1,6 @@
 <img width="1080" height="324" alt="odiocheck" src="https://github.com/user-attachments/assets/4d7b573e-5b0b-4fc7-85de-da60bbb701c2" />
 
-# OdioCheck 🚨 - Deepfake Voice Detection AI
+# OdioCheck - Deepfake Voice Detection AI
 *50.021 Artificial Intelligence Project*
 
 ## Theme
