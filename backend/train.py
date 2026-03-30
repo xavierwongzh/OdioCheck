@@ -147,19 +147,47 @@ def main():
     dataset = AudioDataset(augment=True)
     
     # Optional subset for debugging because MLAAD-tiny is big (13K)
-    subset_size = 100
-    dataset = torch.utils.data.Subset(dataset, range(subset_size))
+    # subset_size = 10
+    # dataset = torch.utils.data.Subset(dataset, range(subset_size))
 
-    train_size = int(0.8 * len(dataset))
-    test_size = len(dataset) - train_size
+    #sample n for real and fake each for training and testing
+    n_real = 20
+    n_fake = 20  
+    
+    labels = torch.tensor(dataset.labels)
+    real_indices = (labels == 0).nonzero(as_tuple=True)[0]
+    fake_indices = (labels == 1).nonzero(as_tuple=True)[0]
+    
+    # Randomly shuffle indices
+    real_indices = real_indices[torch.randperm(len(real_indices))]
+    fake_indices = fake_indices[torch.randperm(len(fake_indices))]
+    
+    # Enforce n selected
+    selected_real = real_indices[:n_real]
+    selected_fake = fake_indices[:n_fake]
 
-    # Isolate split randomization with a specific manual generator
-    split_generator = torch.Generator().manual_seed(SEED)
-    train_dataset, test_dataset = random_split(
-        dataset, 
-        [train_size, test_size], 
-        generator=split_generator
-    )
+    # Explicit 80/20 train-test split for EACH class separately to ensure equal proportions!
+    train_real_size = int(0.8 * len(selected_real))
+    train_fake_size = int(0.8 * len(selected_fake))
+
+    # Build the train/test indices carefully to preserve exact proportions
+    train_indices = torch.cat([
+        selected_real[:train_real_size], 
+        selected_fake[:train_fake_size]
+    ])
+    
+    test_indices = torch.cat([
+        selected_real[train_real_size:], 
+        selected_fake[train_fake_size:]
+    ])
+
+    # Shuffle the final resulting indices so order is randomized during batching
+    train_indices = train_indices[torch.randperm(len(train_indices))].tolist()
+    test_indices = test_indices[torch.randperm(len(test_indices))].tolist()
+
+    # Apply the perfectly stratified split!
+    train_dataset = torch.utils.data.Subset(dataset, train_indices)
+    test_dataset = torch.utils.data.Subset(dataset, test_indices)
 
     train_loader = DataLoader(
         train_dataset,
