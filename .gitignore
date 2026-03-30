@@ -6,3 +6,4 @@ Download_sample (Ignore)/
 __pycache__/
 project_requirements.txt
 generate_notebook.py
+backend/precomputed_features/

@@ -191,6 +191,7 @@ def run_smoke_test(dataloader, device):
 
 def main():
     args = parse_args()
+    print(args)
     
     # ------------------
     # Universal Seed for Colab Reproducibility
@@ -209,7 +210,8 @@ def main():
 
     print("Loading Dataset with Augmentation...")
 
-    dataset = AudioDataset(augment=True, cqcc_cache_dir=args.cqcc_cache_dir)
+    dataset = AudioDataset(augment=False, cqcc_cache_dir=args.cqcc_cache_dir)
+    print(dataset)
     print(f"Using CQCC cache dir: {args.cqcc_cache_dir}")
     dataset.precompute_cqcc_cache(force=args.force_rebuild_cqcc)
 
@@ -217,13 +219,13 @@ def main():
         print("CQCC preprocessing complete. Exiting without training.")
         return
     
-    # Optional subset for debugging because MLAAD-tiny is big (13K)
-    subset_size = 100
-    dataset = torch.utils.data.Subset(dataset, range(subset_size))
+    # # Optional subset for debugging because MLAAD-tiny is big (13K)
+    # subset_size = 100
+    # dataset = torch.utils.data.Subset(dataset, range(subset_size))
 
     #sample n for real and fake each for training and testing
-    n_real = 20
-    n_fake = 20  
+    n_real = 400
+    n_fake = 400 
     
     labels = torch.tensor(dataset.labels)
     real_indices = (labels == 0).nonzero(as_tuple=True)[0]
